@@ -55,6 +55,25 @@ app.post("/login", async (req, res) => {
   }
 });
 
+// GET PEOPLE (Display Route)
+app.get("/api/people", async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from("people")
+      .select("name, age");
+
+    if (error) {
+      return res.status(500).json({ error: error.message });
+    }
+
+    res.status(200).json(data);
+
+  } catch (err) {
+    console.error("Fetch people error:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 // Use dynamic port for deployment (Render requires this)
 const PORT = process.env.PORT || 5000;
 
