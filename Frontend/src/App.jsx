@@ -8,7 +8,7 @@ function App() {
   const login = async () => {
     try {
       const response = await fetch(
-        "https://cohaven-backend.onrender.com/login",
+        "https://cohaven-tinkherhack.onrender.com/login",
         {
           method: "POST",
           headers: {
