@@ -8,9 +8,16 @@ dotenv.config();
 const app = express();
 
 // Allow frontend requests
-app.use(cors({
-  origin: "*"
-}));
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "http://localhost:5174",
+      "https://cohaven.netlify.app"
+    ],
+    methods: ["GET", "POST"],
+  })
+);
 
 // Parse JSON bodies
 app.use(express.json());
