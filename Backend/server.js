@@ -16,6 +16,7 @@ app.use(
       "https://cohaven.netlify.app"
     ],
     methods: ["GET", "POST"],
+    credentials: true
   })
 );
 
