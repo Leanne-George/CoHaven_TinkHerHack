@@ -7,24 +7,23 @@ dotenv.config();
 
 const app = express();
 
-// Allow frontend requests
+// ---------------- CORS ----------------
 app.use(
   cors({
     origin: [
       "http://localhost:5173",
       "http://localhost:5174",
       "http://localhost:5175",
-      "https://cohaven.netlify.app"
+      "https://cohaven.netlify.app",
     ],
     methods: ["GET", "POST"],
-    credentials: true
+    credentials: true,
   })
 );
 
-// Parse JSON bodies
 app.use(express.json());
 
-// Create Supabase client
+// ---------------- SUPABASE ----------------
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_KEY
@@ -35,7 +34,7 @@ app.get("/", (req, res) => {
   res.send("Backend is running 🚀");
 });
 
-// ---------------- LOGIN ROUTE ----------------
+// ---------------- LOGIN ----------------
 app.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -55,7 +54,7 @@ app.post("/login", async (req, res) => {
 
     res.status(200).json({
       message: "Login successful",
-      access_token: data.session.access_token,   // 🔥 important
+      access_token: data.session.access_token,
       user: data.user,
     });
 
@@ -88,8 +87,8 @@ async function authenticateUser(req, res, next) {
 // ---------------- PROFILE ----------------
 app.get("/profile", authenticateUser, async (req, res) => {
   const { data, error } = await supabase
-    .from("profiles")
-    .select("*")
+    .from("people")
+    .select("name")
     .eq("id", req.user.id)
     .single();
 
@@ -99,6 +98,8 @@ app.get("/profile", authenticateUser, async (req, res) => {
 });
 
 // ---------------- TASKS ----------------
+
+// GET tasks
 app.get("/tasks", authenticateUser, async (req, res) => {
   const { data, error } = await supabase
     .from("tasks")
@@ -110,8 +111,13 @@ app.get("/tasks", authenticateUser, async (req, res) => {
   res.json(data);
 });
 
+// ADD task
 app.post("/tasks", authenticateUser, async (req, res) => {
   const { title, task_date } = req.body;
+
+  if (!title || !task_date) {
+    return res.status(400).json({ error: "Title and date required" });
+  }
 
   const { data, error } = await supabase
     .from("tasks")
@@ -125,10 +131,12 @@ app.post("/tasks", authenticateUser, async (req, res) => {
 
   if (error) return res.status(400).json({ error: error.message });
 
-  res.json(data);
+  res.json({ message: "Task added successfully", data });
 });
 
 // ---------------- AVAILABILITY ----------------
+
+// GET availability
 app.get("/availability", authenticateUser, async (req, res) => {
   const { data, error } = await supabase
     .from("availability")
@@ -140,8 +148,13 @@ app.get("/availability", authenticateUser, async (req, res) => {
   res.json(data);
 });
 
+// ADD availability
 app.post("/availability", authenticateUser, async (req, res) => {
   const { date, start_time, end_time } = req.body;
+
+  if (!date || !start_time || !end_time) {
+    return res.status(400).json({ error: "All fields required" });
+  }
 
   const { data, error } = await supabase
     .from("availability")
@@ -156,75 +169,7 @@ app.post("/availability", authenticateUser, async (req, res) => {
 
   if (error) return res.status(400).json({ error: error.message });
 
-  res.json(data);
-});
-
-// ---------------- OPTIONAL OLD ROUTE ----------------
-app.get("/api/people", async (req, res) => {
-  try {
-    const { data, error } = await supabase
-      .from("people")
-      .select("name, age");
-
-    if (error) {
-      return res.status(500).json({ error: error.message });
-    }
-
-    res.status(200).json(data);
-
-  } catch (err) {
-    console.error("Fetch people error:", err);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
-
-
-
-// GET PROFILE
-app.get("/profile/:id", async (req, res) => {
-  const { id } = req.params;
-
-  const { data, error } = await supabase
-    .from("people")
-    .select("name")
-    .eq("id", id)
-    .single();
-
-  if (error) {
-    return res.status(400).json({ error: error.message });
-  }
-
-  res.json(data);
-});
-
-// ADD TASK
-app.post("/tasks", async (req, res) => {
-  const { user_id, title } = req.body;
-
-  const { data, error } = await supabase
-    .from("tasks")
-    .insert([{ user_id, title }]);
-
-  if (error) {
-    return res.status(400).json({ error: error.message });
-  }
-
-  res.json({ message: "Task added", data });
-});
-
-// ADD AVAILABILITY
-app.post("/availability", async (req, res) => {
-  const { user_id, day, start_time, end_time } = req.body;
-
-  const { data, error } = await supabase
-    .from("availability")
-    .insert([{ user_id, day, start_time, end_time }]);
-
-  if (error) {
-    return res.status(400).json({ error: error.message });
-  }
-
-  res.json({ message: "Availability added", data });
+  res.json({ message: "Availability added successfully", data });
 });
 
 const PORT = process.env.PORT || 5000;
