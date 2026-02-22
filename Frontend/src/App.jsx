@@ -1,9 +1,12 @@
 import { useState } from "react";
+import { Routes, Route, useNavigate } from "react-router-dom";
+import Dashboard from "./Dashboard";
 
-function App() {
+function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
+  const navigate = useNavigate();
 
   const login = async () => {
     try {
@@ -21,8 +24,9 @@ function App() {
       const data = await response.json();
 
       if (response.ok) {
-        setMessage("Login successful!");
-        console.log(data);
+        localStorage.setItem("token", data.access_token); // 🔥 store token
+        localStorage.setItem("userId", data.user.id);
+        navigate("/dashboard"); // 🔥 redirect
       } else {
         setMessage(data.error || "Login failed.");
       }
@@ -56,6 +60,15 @@ function App() {
 
       <p>{message}</p>
     </div>
+  );
+}
+
+function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<Login />} />
+      <Route path="/dashboard" element={<Dashboard />} />
+    </Routes>
   );
 }
 
