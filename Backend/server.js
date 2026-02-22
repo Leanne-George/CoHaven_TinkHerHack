@@ -178,6 +178,55 @@ app.get("/api/people", async (req, res) => {
   }
 });
 
+
+
+// GET PROFILE
+app.get("/profile/:id", async (req, res) => {
+  const { id } = req.params;
+
+  const { data, error } = await supabase
+    .from("people")
+    .select("name")
+    .eq("id", id)
+    .single();
+
+  if (error) {
+    return res.status(400).json({ error: error.message });
+  }
+
+  res.json(data);
+});
+
+// ADD TASK
+app.post("/tasks", async (req, res) => {
+  const { user_id, title } = req.body;
+
+  const { data, error } = await supabase
+    .from("tasks")
+    .insert([{ user_id, title }]);
+
+  if (error) {
+    return res.status(400).json({ error: error.message });
+  }
+
+  res.json({ message: "Task added", data });
+});
+
+// ADD AVAILABILITY
+app.post("/availability", async (req, res) => {
+  const { user_id, day, start_time, end_time } = req.body;
+
+  const { data, error } = await supabase
+    .from("availability")
+    .insert([{ user_id, day, start_time, end_time }]);
+
+  if (error) {
+    return res.status(400).json({ error: error.message });
+  }
+
+  res.json({ message: "Availability added", data });
+});
+
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
