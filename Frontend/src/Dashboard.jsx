@@ -11,6 +11,7 @@ const Dashboard = () => {
 
   const [activeTab, setActiveTab] = useState("person1");
   const [generatedSchedule, setGeneratedSchedule] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const [person1, setPerson1] = useState({
     name: "Person 1",
@@ -48,11 +49,34 @@ const Dashboard = () => {
     }));
   };
 
-  const handleGenerate = () => {
-    // Placeholder for now
-    setGeneratedSchedule(
-      "Balanced schedule will appear here after AI integration."
-    );
+  const handleGenerate = async () => {
+    try {
+      setLoading(true);
+      setGeneratedSchedule("");
+
+      const response = await fetch(
+        "https://cohaven-tinkherhack.onrender.com/generate-schedule",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            person1,
+            person2
+          })
+        }
+      );
+
+      const data = await response.json();
+      setGeneratedSchedule(data.schedule);
+      setLoading(false);
+
+    } catch (error) {
+      console.error(error);
+      setGeneratedSchedule("Something went wrong. Please try again.");
+      setLoading(false);
+    }
   };
 
   return (
@@ -80,10 +104,9 @@ const Dashboard = () => {
             </button>
           </div>
 
-          {/* TWO COLUMN LAYOUT */}
           <div className="layout">
 
-            {/* LEFT SIDE - INPUT */}
+            {/* LEFT PANEL */}
             <div className="left-panel">
               <div className="person-card">
                 <h2>{currentPerson.name}</h2>
@@ -116,19 +139,23 @@ const Dashboard = () => {
               </div>
 
               <button className="ai-button" onClick={handleGenerate}>
-                Generate Balanced Schedule
+                {loading ? "Generating..." : "Generate Balanced Schedule"}
               </button>
             </div>
 
-            {/* RIGHT SIDE - OUTPUT */}
+            {/* RIGHT PANEL */}
             <div className="right-panel">
               <div className="schedule-box">
                 <h3>Generated Schedule</h3>
 
-                {generatedSchedule ? (
-                  <p className="schedule-content">
-                    {generatedSchedule}
+                {loading ? (
+                  <p className="schedule-placeholder">
+                    AI is thinking...
                   </p>
+                ) : generatedSchedule ? (
+                  <pre className="schedule-content">
+                    {generatedSchedule}
+                  </pre>
                 ) : (
                   <p className="schedule-placeholder">
                     Your balanced schedule will appear here.
