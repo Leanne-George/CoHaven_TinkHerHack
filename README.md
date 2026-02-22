@@ -9,18 +9,32 @@
 ### Team Name: [Name]
 
 ### Team Members
-- Member 1: [Name] - [College]
-- Member 2: [Name] - [College]
+- Member 1: Leanne George
+
 
 ### Hosted Project Link
-[mention your project hosted link here]
+https://cohaven.netlify.app/
+
+email: liminalskyscape@gmail.com
+password: Liminal123
 
 ### Project Description
-[2-3 lines about what your project does]
+My project basically exists to make the invisible labour of women visble. Women take most of the load of household chores and responsibilities. My project exists to divide this labour equally between both partners, especially in families with children. So it creates a schedule taking into consideration various factors such as the time slots in which both partners are available and keeps tracks of the responsibilities they share. This lowers the mental load women experience in households.
 
 ### The Problem statement
-[What problem are you solving?]
+In shared living spaces and relationships, daily task management and availability coordination often lead to miscommunication, imbalance, and mental load.
 
+There is no simple system that:
+
+Allows each person to add their daily tasks
+
+Share when they are available
+
+View structured personal data
+
+Maintain individual accountability
+
+This leads to invisible labor, scheduling conflicts, and poor coordination.
 ### The Solution
 [How are you solving it?]
 
