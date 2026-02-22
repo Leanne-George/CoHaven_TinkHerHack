@@ -172,18 +172,18 @@ app.post("/availability", authenticateUser, async (req, res) => {
   res.json({ message: "Availability added successfully", data });
 });
 
-const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
-
+// ---------------- GENERATE SCHEDULE (AI) ----------------
 app.post("/generate-schedule", async (req, res) => {
   try {
     const { person1, person2 } = req.body;
 
+    if (!person1 || !person2) {
+      return res.status(400).json({ error: "Missing schedule data" });
+    }
+
     const prompt = `
-Create a fair and balanced schedule.
+Create a fair and balanced household schedule.
 
 Person 1 tasks: ${person1.tasks.join(", ")}
 Person 1 availability: ${person1.availability.join(", ")}
@@ -191,32 +191,48 @@ Person 1 availability: ${person1.availability.join(", ")}
 Person 2 tasks: ${person2.tasks.join(", ")}
 Person 2 availability: ${person2.availability.join(", ")}
 
-Distribute tasks fairly and logically across available times.
-Return in clean readable format.
+Distribute tasks fairly based on availability.
+Return a clear, structured schedule.
 `;
 
-    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${process.env.GROQ_API_KEY}`
-      },
-      body: JSON.stringify({
-        model: "llama3-70b-8192",
-        messages: [
-          { role: "user", content: prompt }
-        ]
-      })
-    });
+    const response = await fetch(
+      "https://api.groq.com/openai/v1/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${process.env.GROQ_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: "llama3-8b-8192", // safer, lighter model
+          messages: [{ role: "user", content: prompt }],
+        }),
+      }
+    );
 
     const data = await response.json();
 
+    console.log("Groq response:", data);
+
+    if (!data.choices || !data.choices.length) {
+      return res.json({
+        schedule: "AI could not generate a schedule. Please try again.",
+      });
+    }
+
     res.json({
-      schedule: data.choices[0].message.content
+      schedule: data.choices[0].message.content,
     });
 
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "AI failed" });
+    console.error("AI route error:", error);
+    res.status(500).json({ error: "AI generation failed" });
   }
+});
+
+
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
